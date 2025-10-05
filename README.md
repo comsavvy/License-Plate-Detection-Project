@@ -2,6 +2,12 @@
 
 ## Python Programming (PP) Project: Senegalese Vehicle License Plate Detector
 
+### Group Members:
+- **Alliance IRIGENERA**
+- **Maryam Yahya MOHAMED**
+- **Olusola Timothy OGUNDEPO**
+- **Jean Baptiste HABINEZA**
+
 ### Objectives:
 
 Write a program in pure Python (no external libraries) that detects the presence of Senegalese vehicle license plate numbers inside any text string. 
