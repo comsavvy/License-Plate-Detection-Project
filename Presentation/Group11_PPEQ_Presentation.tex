@@ -83,36 +83,28 @@
 %====================================================
 \section{Manual Parsing Approach}
 
-\begin{frame}{Why Manual Parsing?}
-  \begin{itemize}
-    \item Educational transparency.
-    \item Fine control over each rule.
-    \item Easy to extend for new patterns.
-    \item Avoids reliance on regex engine.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Pseudocode (High-Level)}
-\begin{verbatim}
-UPPER = text uppercased
-plates = empty list
-i = 0
-while i < length - minimal_length:
-  if next 2 chars not letters: i++ ; continue
-  if next sep not '-' or ' ': i++ ; continue
-  if next 4 chars not digits: i++ ; continue
-  if next sep not '-' or ' ': i++ ; continue
-  read 1 or 2 letters as end_part
-  if none: i++ ; continue
-  check boundary before and after
-  if ok:
-     plate = canonical form with hyphens
-     store if new
-     i = end of match
-  else:
-     i++
-if plates empty: report none else print list
-\end{verbatim}
+\begin{frame}[fragile]{Manual Parsing Pseudocode}
+\footnotesize
+  \begin{verbatim}
+    UPPER = text uppercased
+    plates = empty list
+    i = 0
+    while i < length - minimal_length:
+      if next 2 chars not letters: i++ ; continue
+      if next sep not '-' or ' ': i++ ; continue
+      if next 4 chars not digits: i++ ; continue
+      if next sep not '-' or ' ': i++ ; continue
+      read 1 or 2 letters as end_part
+      if none: i++ ; continue
+      check boundary before and after
+      if ok:
+        plate = canonical form with hyphens
+        store if new
+        i = end of match
+      else:
+        i++
+    if plates empty: report none else print list
+  \end{verbatim}
 \end{frame}
 
 \begin{frame}{Boundary Handling}
@@ -139,10 +131,10 @@ if plates empty: report none else print list
           \begin{itemize}
             \item \texttt{(?i)} Case-insensitive matching
             \item \texttt{(?<![A-Z0-9])} Left boundary (no letter/digit before)
-            \item \texttt{([A-Z]{2})} Two letters
+            \item \texttt{([A-Z]\{2\})} Two letters
             \item \texttt{[- ]} Separator (hyphen or space)
-            \item \texttt{(\d{4})} Four digits
-            \item \texttt{([A-Z]{1,2})} One or two letters
+            \item \texttt{(\textbackslash d\{4\})} Four digits
+            \item \texttt{([A-Z]\{1,2\})} One or two letters
             \item \texttt{(?![A-Z0-9])} Right boundary (no letter/digit after)
           \end{itemize}
         \end{block}
@@ -188,27 +180,6 @@ if plates empty: report none else print list
     \item No false positives in sample.
     \item Output normalized consistently.
     \item Order preserved; duplicates removed.
-  \end{itemize}
-\end{frame}
-
-%====================================================
-\section{Limitations and Improvements}
-
-\begin{frame}{Current Limitations}
-  \begin{itemize}
-    \item No fuzzy/typo tolerance.
-    \item Only Senegal formats covered.
-    \item Pattern validity only (not real issuance).
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Potential Enhancements}
-  \begin{itemize}
-    \item Add fuzzy (edit-distance) matching.
-    \item Multi-country format registry.
-    \item Batch file / dataset scanning.
-    \item JSON / CSV export.
-    \item Performance benchmarking.
   \end{itemize}
 \end{frame}
 
