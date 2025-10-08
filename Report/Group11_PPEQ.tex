@@ -97,6 +97,28 @@ We walk through the text one character at a time. At each position we check if t
     \item Avoid duplicates.
 \end{enumerate}
 
+\subsection{Manual Parsing Pseudocode}
+\begin{verbatim}
+    UPPER = text uppercased
+    plates = empty list
+    i = 0
+    while i < length - minimal_length:
+      if next 2 chars not letters: i++ ; continue
+      if next sep not '-' or ' ': i++ ; continue
+      if next 4 chars not digits: i++ ; continue
+      if next sep not '-' or ' ': i++ ; continue
+      read 1 or 2 letters as end_part
+      if none: i++ ; continue
+      check boundary before and after
+      if ok:
+        plate = canonical form with hyphens
+        store if new
+        i = end of match
+      else:
+        i++
+    if plates empty: report none else print list
+  \end{verbatim}
+
 \subsection{Strengths / Weaknesses}
 \textbf{Strengths:} Transparent, easy to modify, no hidden behavior. \\
 \textbf{Weaknesses:} More lines of code than a regex.
@@ -118,15 +140,15 @@ The regex puts the same rules into one pattern. It is shorter and fast. We still
 
 \section{Boundary Condition Management}
 
-A critical aspect of the implementation involves robust boundary condition checking to prevent false positives. The algorithm examines the characters immediately preceding and following potential plate matches to ensure they are not alphanumeric. This boundary validation ensures that the system doesn't mistakenly identify substrings within larger words or alphanumeric codes as license plates.
+A critical aspect of the implementation involves robust boundary condition checking to prevent false positives. The algorithm examines the characters immediately preceding and following potential plate matches to ensure they are not alphanumeric. This boundary validation ensures that the system doesn't mistakenly identify substrings within larger words or alphanumeric codes as license plates.\\[6pt]
 
-The boundary checking mechanism employs logical conditions that consider both the position within the text string and the alphanumeric properties of adjacent characters. This sophisticated approach handles edge cases such as plates appearing at the beginning or end of text inputs, as well as plates surrounded by punctuation or whitespace.
+\noindent The boundary checking mechanism employs logical conditions that consider both the position within the text string and the alphanumeric properties of adjacent characters. This sophisticated approach handles edge cases such as plates appearing at the beginning or end of text inputs, as well as plates surrounded by punctuation or whitespace.
 
 \section{Pattern Normalization and Storage}
 
-Upon successful identification and validation of a license plate, the program performs normalization to standardize the output format. Regardless of the original separator type (hyphen or space) found in the input text, all detected plates are converted to the canonical hyphen-separated uppercase format. This normalization ensures consistency in output presentation and facilitates subsequent processing or comparison operations.
+Upon successful identification and validation of a license plate, the program performs normalization to standardize the output format. Regardless of the original separator type (hyphen or space) found in the input text, all detected plates are converted to the canonical hyphen-separated uppercase format. This normalization ensures consistency in output presentation and facilitates subsequent processing or comparison operations.\\[6pt]
 
-The storage system maintains detected plates in an ordered list that preserves the sequence of appearance in the original text. Duplicate elimination is implemented through membership checking before list insertion, ensuring that each unique plate appears only once in the final output while maintaining the first occurrence position in the ordering.
+\noindent The storage system maintains detected plates in an ordered list that preserves the sequence of appearance in the original text. Duplicate elimination is implemented through membership checking before list insertion, ensuring that each unique plate appears only once in the final output while maintaining the first occurrence position in the ordering.
 
 \section{Added Comparison Helper}
 We included a helper function \texttt{compare\_detectors()} so both methods can be run on the same sample text to show they agree.
