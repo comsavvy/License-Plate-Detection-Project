@@ -1,0 +1,153 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+\geometry{margin=1in}
+\setstretch{1.2}
+\titleformat{\section}{\large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{1em}{}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!5},
+    frame=single,
+    breaklines=true,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    showstringspaces=false
+}
+
+\begin{document}
+
+\begin{center}
+    \Large \textbf{Project Report: Senegalese License Plate Detection System}
+\end{center}
+\section*{Abstract}
+This project builds a simple Python program that finds Senegalese vehicle license plate numbers that appear inside any piece of text. It works without using external libraries. It supports two valid formats, accepts both hyphens and single spaces as separators, ignores letter case, and prints all plates it finds in a clean, standard form. We also add a second version that uses a regular expression (regex) to do the same job in fewer lines. The goal is clarity, correctness, and ease of understanding.
+\section{Introduction}
+We often need to pull structured items (like license plates) out of unstructured text (paragraphs, notes, reports). This project shows how to do that for Senegalese license plates using two approaches:
+\begin{enumerate}
+    \item A manual step-by-step parser (no regex)
+    \item A regex-based version (shorter, but less explicit)
+\end{enumerate}
+\section{What Counts as a Valid Plate}
+Accepted shapes (letters = A–Z, digits = 0–9):
+\begin{itemize}
+    \item XY-1234-T
+    \item XY-1234-ZT
+\end{itemize}
+
+\noindent You may also write them with spaces instead of hyphens: \texttt{XY 1234 T} or \texttt{XY 1234 ZT}.
+\vspace{6pt}
+
+\noindent \textbf{Rules:}
+\begin{itemize}
+    \item First two characters: letters
+    \item Separator: hyphen (-) or single space
+    \item Four digits
+    \item Separator: hyphen (-) or single space
+    \item Last part: 1 or 2 letters
+    \item No extra letters/digits glued directly to the left or right
+    \item Case-insensitive input; output always uppercase with hyphens
+\end{itemize}
+
+\noindent \textbf{Examples that SHOULD match:}
+\begin{verbatim}
+    ab-1234-e
+    ab 1234 e
+    mn-4321-zt
+    uv 9876 t
+\end{verbatim}
+
+\noindent \textbf{Examples that SHOULD NOT match:}
+\begin{verbatim}
+    AAB-1234-T   (three starting letters)
+    AB-12345-T   (five digits)
+    AB_1234_T    (underscores are not allowed)
+    AB-1234-TXQ  (last part too long)
+\end{verbatim}
+
+\section{Main Goals}
+\begin{itemize}
+    \item Detect any valid plate in a text
+    \item Show each unique plate once, in order of appearance
+    \item Print a helpful message if none are found
+    \item Make the code easy to read and extend
+    \item Provide an alternative regex version for comparison
+\end{itemize}
+
+\section{Approach 1: Manual Parsing (No Regex)}
+\subsection{Logical Idea for Manual Parsing}
+We walk through the text one character at a time. At each position we check if the next characters could form a valid plate. If not, we move one step forward. If yes, we store it (in a standard format) and then jump ahead past it.
+
+\subsection{Steps}
+\begin{enumerate}
+    \item Convert the whole text to uppercase (so we only compare one case).
+    \item Check two letters.
+    \item Check a separator (hyphen or space).
+    \item Check four digits.
+    \item Check a separator.
+    \item Collect one or two ending letters.
+    \item Make sure there is a boundary (start/end of text OR a non-letter/digit) before and after.
+    \item Normalize to the form: \texttt{XY-1234-T} or \texttt{XY-1234-ZT}.
+    \item Avoid duplicates.
+\end{enumerate}
+
+\subsection{Strengths / Weaknesses}
+\textbf{Strengths:} Transparent, easy to modify, no hidden behavior. \\
+\textbf{Weaknesses:} More lines of code than a regex.
+
+\section{Approach 2: Regex Version}
+The regex puts the same rules into one pattern. It is shorter and fast. We still normalize output the same way (always with hyphens and uppercase). Lookbehind and lookahead prevent partial matches inside larger words.
+
+\subsection{Explanation of the Regex Pattern}
+\begin{itemize}
+    \item \texttt{(?i)} ignore case
+    \item \texttt{(?<![A-Z0-9])} left side is not a letter/digit
+    \item \texttt{([A-Z]{2})} two letters
+    \item \texttt{[- ]} separator
+    \item \texttt{(\textbackslash d\{4\})} four digits
+    \item \texttt{[- ]} separator
+    \item \texttt{([A-Z]\{1,2\})} one or two letters
+    \item \texttt{(?![A-Z0-9])} right side is not a letter/digit
+\end{itemize}
+
+\section{Boundary Condition Management}
+
+A critical aspect of the implementation involves robust boundary condition checking to prevent false positives. The algorithm examines the characters immediately preceding and following potential plate matches to ensure they are not alphanumeric. This boundary validation ensures that the system doesn't mistakenly identify substrings within larger words or alphanumeric codes as license plates.
+
+The boundary checking mechanism employs logical conditions that consider both the position within the text string and the alphanumeric properties of adjacent characters. This sophisticated approach handles edge cases such as plates appearing at the beginning or end of text inputs, as well as plates surrounded by punctuation or whitespace.
+
+\section{Pattern Normalization and Storage}
+
+Upon successful identification and validation of a license plate, the program performs normalization to standardize the output format. Regardless of the original separator type (hyphen or space) found in the input text, all detected plates are converted to the canonical hyphen-separated uppercase format. This normalization ensures consistency in output presentation and facilitates subsequent processing or comparison operations.
+
+The storage system maintains detected plates in an ordered list that preserves the sequence of appearance in the original text. Duplicate elimination is implemented through membership checking before list insertion, ensuring that each unique plate appears only once in the final output while maintaining the first occurrence position in the ordering.
+
+\section{Added Comparison Helper}
+We included a helper function \texttt{compare\_detectors()} so both methods can be run on the same sample text to show they agree.
+
+\section{Testing}
+We built a test paragraph mixing valid plates, invalid near-misses, different separators, different ending lengths, and case variations. Both methods returned the same valid list.
+
+\section{Results (In Simple Terms)}
+\begin{itemize}
+    \item All expected plates were detected.
+    \item No incorrect matches were printed in testing examples.
+    \item Output is consistent and clean.
+\end{itemize}
+
+\section{Limitations}
+\begin{itemize}
+    \item No fuzzy matching (typos or OCR mistakes not handled).
+    \item Only supports the two Senegal patterns described.
+    \item Does not check whether the plate is officially issued, just the pattern.
+\end{itemize}
+
+\section{Conclusion}
+We now have two clear ways to find Senegalese license plates inside any text: a manual parser and a regex version. Both meet the goals of correctness, clarity, and simple output. The manual version is ideal for learning and future tweaks. The regex version is concise and practical.
+\end{document}

@@ -1,0 +1,247 @@
+% Beamer presentation for Senegalese License Plate Detection
+% Author: Group 11
+% Date: Automatically generated
+\documentclass[aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+
+\title[Plate Detection]{Senegalese License Plate Detection System}
+\subtitle{Manual Parsing and Regex Approaches}
+\author{Group 11: A. Irigenera, M. Y. Mohamed, O. T. Ogundepo, J. B. Habineza}
+\institute{AIMS Rwanda}
+\date{\today}
+
+% Helper commands
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+%====================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%====================================================
+\begin{frame}{Agenda}
+  \tableofcontents[hidesubsections]
+\end{frame}
+
+%====================================================
+\section{Problem Overview}
+
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item Extract structured information (license plates) from plain text.
+    \item Useful for logs, reports, monitoring, and preprocessing.
+    \item Focus: Senegalese vehicle plate formats only.
+    \item Two complementary methods: manual parser and regex pattern.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Plate Formats}
+  Accepted canonical patterns (letters A--Z, digits 0--9):
+  \begin{itemize}
+    \item \code{XY-1234-T}
+    \item \code{XY-1234-ZT}
+  \end{itemize}
+  Separators may be hyphen or single space in input: \code{XY 1234 T}.
+\end{frame}
+
+\begin{frame}{Rules Recap}
+  \begin{itemize}
+    \item 2 starting letters
+    \item Separator: \code{-} or space
+    \item 4 digits
+    \item Separator: \code{-} or space
+    \item 1 or 2 trailing letters
+    \item Not embedded inside longer alphanumeric strings
+    \item Case-insensitive input; uppercase normalized output
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section{Objectives}
+
+\begin{frame}{Core Objectives}
+  \begin{itemize}
+    \item Detect all valid plates in arbitrary text.
+    \item Print normalized unique results in order.
+    \item Report when none are found.
+    \item Provide simple, readable logic.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Extended Objectives}
+  \begin{itemize}
+    \item Allow punctuation around plates.
+    \item Interactive menu (manual testing).
+    \item Provide alternative regex method.
+    \item Keep code dependency-free (core version).
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section{Manual Parsing Approach}
+
+\begin{frame}{Why Manual Parsing?}
+  \begin{itemize}
+    \item Educational transparency.
+    \item Fine control over each rule.
+    \item Easy to extend for new patterns.
+    \item Avoids reliance on regex engine.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Pseudocode (High-Level)}
+\begin{verbatim}
+UPPER = text uppercased
+plates = empty list
+i = 0
+while i < length - minimal_length:
+  if next 2 chars not letters: i++ ; continue
+  if next sep not '-' or ' ': i++ ; continue
+  if next 4 chars not digits: i++ ; continue
+  if next sep not '-' or ' ': i++ ; continue
+  read 1 or 2 letters as end_part
+  if none: i++ ; continue
+  check boundary before and after
+  if ok:
+     plate = canonical form with hyphens
+     store if new
+     i = end of match
+  else:
+     i++
+if plates empty: report none else print list
+\end{verbatim}
+\end{frame}
+
+\begin{frame}{Boundary Handling}
+  \begin{itemize}
+    \item Ensure no letter/digit directly touches start or end of detected pattern.
+    \item Prevents false matches inside longer tokens (e.g. \code{AAXY-1234-T}).
+    \item Accepts punctuation (comma, period) near plates.
+  \end{itemize}
+\end{frame}
+
+
+%====================================================
+\section{Regex Approach}
+
+\begin{frame}[fragile]{Regex Pattern}
+  Core pattern (case-insensitive):
+  \begin{block}{Pattern}
+  \small\verb|(?i)(?<![A-Z0-9])([A-Z]{2})[- ](\d{4})[- ]([A-Z]{1,2})(?![A-Z0-9])|
+  \end{block}
+  \begin{columns}[T,totalwidth=\textwidth]
+      \begin{column}{0.65\textwidth}
+        \begin{block}{Pattern Components}
+          \small
+          \begin{itemize}
+            \item \texttt{(?i)} Case-insensitive matching
+            \item \texttt{(?<![A-Z0-9])} Left boundary (no letter/digit before)
+            \item \texttt{([A-Z]{2})} Two letters
+            \item \texttt{[- ]} Separator (hyphen or space)
+            \item \texttt{(\d{4})} Four digits
+            \item \texttt{([A-Z]{1,2})} One or two letters
+            \item \texttt{(?![A-Z0-9])} Right boundary (no letter/digit after)
+          \end{itemize}
+        \end{block}
+    \end{column}
+    \begin{column}{0.35\textwidth}
+      \begin{itemize}
+        \vspace{2em}
+
+        \item Lookbehind / lookahead enforce clean boundaries.
+        \item Captures letter block, digits, ending letters.
+        \item Short, expressive, fast.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Manual vs Regex}
+  \begin{tabular}{p{0.42\linewidth} p{0.52\linewidth}}
+    \textbf{Manual} & \textbf{Regex} \\
+    Stepwise logic & Compact expression \\
+    Easy to tweak mid-steps & Faster to write \\
+    Verbose & Dense syntax \\
+    Didactic & Concise \\
+  \end{tabular}
+\end{frame}
+
+%====================================================
+\section{Testing and Results}
+
+\begin{frame}{Test Design}
+  Mixed sample paragraph included:
+  \begin{itemize}
+    \item Valid plates with hyphens and spaces.
+    \item Single-letter and two-letter endings.
+    \item Mixed casing.
+    \item Near-miss invalid patterns.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Observed Outcomes}
+  \begin{itemize}
+    \item All expected valid plates detected.
+    \item No false positives in sample.
+    \item Output normalized consistently.
+    \item Order preserved; duplicates removed.
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section{Limitations and Improvements}
+
+\begin{frame}{Current Limitations}
+  \begin{itemize}
+    \item No fuzzy/typo tolerance.
+    \item Only Senegal formats covered.
+    \item Pattern validity only (not real issuance).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Potential Enhancements}
+  \begin{itemize}
+    \item Add fuzzy (edit-distance) matching.
+    \item Multi-country format registry.
+    \item Batch file / dataset scanning.
+    \item JSON / CSV export.
+    \item Performance benchmarking.
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item Two clear methods implemented: manual parser and regex.
+    \item Both meet detection, normalization, and uniqueness goals.
+    \item Manual path aids learning; regex path aids brevity.
+    \item Solid base for future extensions (fuzzy logic, more formats).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Key Takeaways}
+  \begin{itemize}
+    \item Keep patterns explicit when teaching.
+    \item Normalize early for consistency.
+    \item Enforce boundaries to avoid false positives.
+    \item Provide alternative implementations for flexibility.
+  \end{itemize}
+\end{frame}
+
+%====================================================
+\section*{Q&A}
+
+\begin{frame}{Questions}
+  \centering \Huge Thank You!\\[1em]
+  \large Questions / Feedback?
+\end{frame}
+
+\end{document}
